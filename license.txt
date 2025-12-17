@@ -1,0 +1,11 @@
+Model Information:
+* title:	Puddingman2
+* source:	https://sketchfab.com/3d-models/puddingman2-93a57b5222594bc6b34a1e792080873f
+* author:	danai037 (https://sketchfab.com/takdanai03777)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Puddingman2" (https://sketchfab.com/3d-models/puddingman2-93a57b5222594bc6b34a1e792080873f) by danai037 (https://sketchfab.com/takdanai03777) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
