@@ -2,52 +2,99 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AR Multi-Box with Sound</title>
+  <title>AR iOS Sound Fix</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
+  <style>
+    #overlay {
+      position: absolute;
+      z-index: 999;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      font-family: sans-serif;
+    }
+    #start-btn {
+      padding: 15px 30px;
+      font-size: 20px;
+      background: #ef2d5e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+
   <script>
+    // Component จัดการการคลิกและเสียง
     AFRAME.registerComponent('click-handler', {
       init: function () {
-        // อ้างอิงตัว Entity
         var el = this.el;
-
         el.addEventListener('click', function (evt) {
-          // 1. สั่งเล่นเสียง (เรียกใช้ sound component ที่ฝังอยู่ใน entity)
-          el.components.sound.stopSound(); // หยุดเสียงเก่าก่อน (เผื่อกดรัว)
-          el.components.sound.playSound(); // เล่นเสียงใหม่
+          // สั่งเล่นเสียง
+          el.components.sound.stopSound(); 
+          el.components.sound.playSound(); 
 
-          // 2. ขยายขนาด (Animation เล็กๆ)
+          // Animation ขยาย
           let currentScale = el.getAttribute('scale');
-          el.setAttribute('scale', {
-            x: currentScale.x * 1.2, // ขยายแค่ 1.2 เท่าพอ ให้พอดูออก
-            y: currentScale.y * 1.2,
-            z: currentScale.z * 1.2
-          });
-
-          // (Optional) คืนค่าเดิมหลังจาก 200ms เพื่อทำเอฟเฟกต์เด้งดึ๋ง
+          el.setAttribute('scale', { x: currentScale.x * 1.2, y: currentScale.y * 1.2, z: currentScale.z * 1.2 });
+          
           setTimeout(() => {
              el.setAttribute('scale', {x: 0.5, y: 0.5, z: 0.5});
           }, 200);
-
-          console.log('Clicked and Sound Played!');
         });
       }
+    });
+
+    // ฟังก์ชันสำหรับปุ่ม Start (หัวใจสำคัญของ iOS)
+    window.addEventListener('load', () => {
+      const overlay = document.getElementById('overlay');
+      const startBtn = document.getElementById('start-btn');
+      
+      startBtn.addEventListener('click', () => {
+        // 1. ซ่อน Overlay
+        overlay.style.display = 'none';
+        
+        // 2. ปลดล็อก Audio Context ของ A-Frame ทันทีที่กดปุ่มนี้
+        const entity = document.querySelector('[sound]');
+        if (entity && entity.components.sound) {
+           // เล่นเสียงเบาๆ 1 ครั้งเพื่อกระตุ้นระบบ iOS
+           entity.components.sound.playSound();
+           entity.components.sound.stopSound();
+        }
+        
+        // ถ้า AudioContext ยังถูกระงับ (Suspended) ให้สั่ง Resume
+        if (AFRAME.scenes[0].audioListener && AFRAME.scenes[0].audioListener.context.state === 'suspended') {
+            AFRAME.scenes[0].audioListener.context.resume();
+        }
+      });
     });
   </script>
 </head>
 
 <body style="margin:0; overflow:hidden;">
+
+  <div id="overlay">
+    <div>Please turn on Ringer (Side Switch)</div>
+    <button id="start-btn">TAP TO START</button>
+  </div>
+
   <a-scene
     vr-mode-ui="enabled: false"
     arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
-    renderer="logarithmicDepthBuffer: true; antialias: true;"
+    renderer="logarithmicDepthBuffer: true;"
   >
 
     <a-assets>
       <a-asset-item id="sceneModel" src="scene.gltf"></a-asset-item>
-      
-      <audio id="clickSoundSrc" src="jump1.mp3" preload="auto" crossorigin="anonymous"></audio>
+      <audio id="clickSoundSrc" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.mp3" preload="auto"></audio>
     </a-assets>
 
     <a-entity
@@ -56,7 +103,7 @@
       position="0 1.5 -1"
       rotation="0 0 0"
       class="clickable"
-      sound="src: #clickSoundSrc; on: click; poolSize: 5; positional: false; volume: 1;"
+      sound="src: #clickSoundSrc; on: click; poolSize: 5; positional: false;"
       click-handler
     >
     </a-entity>
