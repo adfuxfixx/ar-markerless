@@ -1,32 +1,74 @@
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AR Multi-Box Example</title>
+  <title>AR Multi-Box with Sound</title>
   <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+
+  <script>
+    AFRAME.registerComponent('click-handler', {
+      init: function () {
+        // อ้างอิงตัว Entity
+        var el = this.el;
+
+        el.addEventListener('click', function (evt) {
+          // 1. สั่งเล่นเสียง (เรียกใช้ sound component ที่ฝังอยู่ใน entity)
+          el.components.sound.stopSound(); // หยุดเสียงเก่าก่อน (เผื่อกดรัว)
+          el.components.sound.playSound(); // เล่นเสียงใหม่
+
+          // 2. ขยายขนาด (Animation เล็กๆ)
+          let currentScale = el.getAttribute('scale');
+          el.setAttribute('scale', {
+            x: currentScale.x * 1.2, // ขยายแค่ 1.2 เท่าพอ ให้พอดูออก
+            y: currentScale.y * 1.2,
+            z: currentScale.z * 1.2
+          });
+
+          // (Optional) คืนค่าเดิมหลังจาก 200ms เพื่อทำเอฟเฟกต์เด้งดึ๋ง
+          setTimeout(() => {
+             el.setAttribute('scale', {x: 0.5, y: 0.5, z: 0.5});
+          }, 200);
+
+          console.log('Clicked and Sound Played!');
+        });
+      }
+    });
+  </script>
 </head>
+
 <body style="margin:0; overflow:hidden;">
   <a-scene
     vr-mode-ui="enabled: false"
     arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
+    renderer="logarithmicDepthBuffer: true; antialias: true;"
   >
 
-<a-assets>
-<a-asset-item id="sceneModel" src="scene.gltf"></a-asset-item>
-</a-assets>
+    <a-assets>
+      <a-asset-item id="sceneModel" src="scene.gltf"></a-asset-item>
+      
+      <audio id="clickSoundSrc" src="jump1.mp3" preload="auto" crossorigin="anonymous"></audio>
+    </a-assets>
 
-<a-entity
-gltf-model="#sceneModel"
-scale=" 0.5 0.5 0.5"
-position="0 1.5 -1"
-rotation="0 0 0">
-</a-entity>
+    <a-entity
+      gltf-model="#sceneModel"
+      scale="0.5 0.5 0.5"
+      position="0 1.5 -1"
+      rotation="0 0 0"
+      class="clickable"
+      sound="src: #clickSoundSrc; on: click; poolSize: 5; positional: false; volume: 1;"
+      click-handler
+    >
+    </a-entity>
 
-    <a-camera
-      rotation-reader
-      look-controls
-      wasd-controls
-    ></a-camera>
+    <a-camera rotation-reader look-controls wasd-controls>
+      <a-entity
+        cursor="fuse: false; rayOrigin: mouse;"
+        raycaster="objects: .clickable"
+        position="0 0 -1"
+        visible="false">
+      </a-entity>
+    </a-camera>
 
   </a-scene>
 </body>
